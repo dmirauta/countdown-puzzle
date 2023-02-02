@@ -119,9 +119,9 @@ def print_sol(gs, t):
     print(ss.sols)
 
 
-# pool = Pool()
-# rs = ReachableSearch([100, 75, 8, 3, 9, 9])
-# rs.mp(pool)
-# pool.close()
-# print(rs.unreachable_targets)
+pool = Pool()
+rs = ReachableSearch([1,1,6,6,10,10])
+rs.mp(pool)
+pool.close()
+print(rs.unreachable_targets)
 
