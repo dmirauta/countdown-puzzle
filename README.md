@@ -4,7 +4,7 @@ Enumerates all solvable target numbers for all possible random gamesets, given a
 
 ## Countdown game
 
-The generalised game is to pick up to 4 from a set of 4 "Large" (11-100) and remaining from small (1-10) to make six, where smalls can be duplicated once
+The generalised game is to pick up to 4 from a set of 4 "Large" (11-100) which we will denote with A,B,C,D and remaining from small (1-10) to make six (denoted a,b,...), where smalls can be duplicated once
 
 13243 possible games sets (per set of 4 large nums), arranged as:
 
@@ -48,4 +48,4 @@ The generalised game is to pick up to 4 from a set of 4 "Large" (11-100) and rem
 
 ## Code info
 
-Currently, `gamesets.py` generates all gamesets and stores them to a file called `A_B_C_D.res` where A,B,C,D is the large set. Then `game_reachability.c` iterates through these and lists all the unreachable targets on a corresponding line in `A_B_C_D_unreachable.res`.
+Currently, `gamesets.py` generates all gamesets for a given large set and stores them to a file called `A_B_C_D.res`. Then `./calc_reachable` (generated via `gcc "c sol/gamesets_reachability.c" -o calc_reachable -O3`) iterates through these and lists all the unreachable targets on a corresponding line in `A_B_C_D_unreachable.res`.
