@@ -147,7 +147,7 @@ def calc_gamesets(
     return gamesets
 
 # write all gamesets to an input file
-with open("_".join(map(str,large)), "w") as file:
+with open("_".join(map(str,large)+".res"), "w") as file:
     for gameset in calc_gamesets():
         file.write(" ".join(map(str,gameset))+"\n")
 

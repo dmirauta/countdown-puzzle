@@ -19,8 +19,8 @@ void print_unreachable(bool *reachable, FILE *file)
 
 int main()
 {
-    FILE *in_file  = fopen("25_50_75_100", "r");
-    FILE *out_file = fopen("25_50_75_100_unreachable", "w");
+    FILE *in_file  = fopen("25_50_75_100.res", "r");
+    FILE *out_file = fopen("25_50_75_100_unreachable.res", "w");
 
     bool reachable[900];
     int queue[MAX_QUEUE_SIZE*6];
