@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     string path = filesystem::current_path();
     vector<string> source_files{"kernel.cl"};
-    vector<string> kernel_names{"test"};//"batch_calc_reachable"};
+    vector<string> kernel_names{"batch_calc_reachable"};
 
     ecl.load_kernels(source_files, kernel_names, " -I \""+path+"\" -D MAX_QUEUE_SIZE=400");
 
@@ -53,6 +53,13 @@ int main(int argc, char* argv[]) {
         fscanf(in_file, "%d %d %d %d %d %d\n", &a, &b, &c, &d, &e, &f); 
         gamesets[i][0] = a; gamesets[i][1] = b; gamesets[i][2] = c;
         gamesets[i][3] = d; gamesets[i][4] = e; gamesets[i][5] = f;
+        // if (i<3)
+        //     cout << a << ", " 
+        //          << b << ", " 
+        //          << c << ", " 
+        //          << d << ", " 
+        //          << e << ", " 
+        //          << f << "\n";
     }
 
     // Run kernel
