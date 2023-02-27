@@ -1,6 +1,6 @@
 
 csol:
-	gcc "c sol/gamesets_reachability.c" -o csol.out -O3
+	gcc gamesets_reachability.c -o csol.out -O3 -g
 
 clean:
 	-rm new_core*
