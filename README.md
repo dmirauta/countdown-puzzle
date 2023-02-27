@@ -2,6 +2,8 @@
 
 Enumerates all solvable target numbers for all possible random gamesets, given a set of large numbers. Can also be used to list solutions for given target and gameset (only in python solution currently).
 
+Prompted by https://www.youtube.com/watch?v=X-7Wev90lw4.
+
 ## Countdown game
 
 The generalised game is to pick up to 4 from a set of 4 "Large" (11-100) which we will denote with A,B,C,D and remaining from small (1-10) to make six (denoted a,b,...), where smalls can be duplicated once

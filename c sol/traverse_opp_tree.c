@@ -8,6 +8,7 @@ void new_node(int r, int i, int j,
 {
     nncalls++;
 
+    // On creating new, take a note of what has been reached
     if (r>=100 && r<1000)
     {
         reachable[r-100] = true;
@@ -35,7 +36,9 @@ void new_node(int r, int i, int j,
     // printf("  %d %d %d %d %d %d\n\n", parent[0], parent[1], parent[2], parent[3], parent[4], parent[5]);
 }
 
-bool traverse(bool *reachable, int *queue, int *gameset)
+bool traverse(bool *reachable, // reachability for numbers 100-1000
+              int *queue,      // Every 6 ints is a node in the graph, containing currently available numbers
+              int *gameset)    // The gameset for which we are trying to enumerate all valid combinations of operations
 {
     int parent[6];
 
@@ -58,15 +61,15 @@ bool traverse(bool *reachable, int *queue, int *gameset)
 
     int queue_end_idx = 0;
 
-    int n1, n2, nn;
+    int n1, n2, node_sum;
     while (queue_end_idx>=0)
     {
-        nn=0;
+        node_sum=0;
         for(int i=0; i<6; i++)
         {
-            if (queue[queue_end_idx*6 +i]>0) { nn++; }
+            if (queue[queue_end_idx*6 +i]>0) { node_sum++; }
         }
-        if (nn<=1)
+        if (node_sum<=1) // not an expandable node, move back
         {
             queue_end_idx--;
             continue;
