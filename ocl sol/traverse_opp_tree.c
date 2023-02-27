@@ -1,12 +1,8 @@
-const int MAX_QUEUE_SIZE = 400; // 120 - 200 possibly enough
-
-int nncalls = 0;
 
 void new_node(int r, int i, int j, 
               int *queue, int *parent, bool *reachable,
               int *queue_end_idx)
 {
-    nncalls++;
 
     // On creating new, take a note of what has been reached
     if (r>=100 && r<1000)

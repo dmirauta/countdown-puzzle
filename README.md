@@ -50,4 +50,4 @@ The generalised game is to pick up to 4 from a set of 4 "Large" (11-100) which w
 
 ## Code info
 
-Currently, `gamesets.py` generates all gamesets for a given large set and stores them to a file called `A_B_C_D.res`. Then `./calc_reachable` (generated via `gcc "c sol/gamesets_reachability.c" -o calc_reachable -O3`) iterates through these and lists all the unreachable targets on a corresponding line in `A_B_C_D_unreachable.res`.
+Currently, `gamesets.py` generates all gamesets for a given large set and stores them to a file called `A_B_C_D.res`. See each solution folder for further details.
