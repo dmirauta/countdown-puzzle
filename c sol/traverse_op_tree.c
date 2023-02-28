@@ -37,12 +37,12 @@ void new_node(int r, int i, int j,
 }
 
 bool traverse(bool *reachable, // reachability for targets 100-999
-              int *queue,      // Every 6 ints is a node in the graph, containing currently available numbers
+              int *queue,      // Every 6 ints is a node in the graph, each node being an intermediate number set (after applying some ops)
               int *gameset)    // The gameset for which we are trying to enumerate all valid combinations of operations
+// Traverse the tree of op choices for a single game set.
 {
-    int parent[6];
 
-    //// Init arrs
+    //// Init given arrs
     for(int i=0; i<6; i++)
     {
         queue[i]=gameset[i];
@@ -59,11 +59,13 @@ bool traverse(bool *reachable, // reachability for targets 100-999
     }
     //
 
+    int parent[6];
     int queue_end_idx = 0;
-
     int n1, n2, node_sum;
+
     while (queue_end_idx>=0)
     {
+        //// This will point to a generated node, but could be an end node
         node_sum=0;
         for(int i=0; i<6; i++)
         {
@@ -74,6 +76,7 @@ bool traverse(bool *reachable, // reachability for targets 100-999
             queue_end_idx--;
             continue;
         }
+        //
 
         // current node to expand
         for(int i=0; i<6; i++)
@@ -120,7 +123,8 @@ bool traverse(bool *reachable, // reachability for targets 100-999
                         if (queue_end_idx>=MAX_QUEUE_SIZE) { return false; }
                     }
 
-                    queue_end_idx--; // point back to last valid node
+                    queue_end_idx--; // point back to last valid node 
+                                     // (new_node increments to empty slot for writing, but we will want to read next)
 
                 }
             }

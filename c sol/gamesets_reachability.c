@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "traverse_opp_tree.c"
+#include "traverse_op_tree.c"
 
 const int MAX_GAMESETS = 13243;
 

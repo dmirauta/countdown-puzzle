@@ -65,6 +65,7 @@ int main(int argc, char* argv[]) {
     // Run kernel
     ecl.apply_kernel("batch_calc_reachable", gamesets, reachable_arrs);
 
+    // Output result
     for (int i=0; i<MAX_GAMESETS; i++)
     {
         print_unreachable(reachable_arrs[i], out_file);

@@ -1,5 +1,5 @@
 #include "structs.h"
-#include "traverse_opp_tree.c"
+#include "traverse_op_tree.c"
 
 __kernel void batch_calc_reachable( __global   GameSet_t* gamesets,
                                     __global Reachable_t* reachable_arrs)
