@@ -3,7 +3,7 @@ from multiprocessing import Pool
 import numpy as np
 
 
-opps = {"+":lambda x,y:x+y,
+ops = {"+":lambda x,y:x+y,
         "-":lambda x,y:x-y,
         "*":lambda x,y:x*y,
         "/":lambda x,y:x//y}
@@ -18,11 +18,11 @@ class State:
         self.N = len(self.nums)
         self.hist = hist
     
-    def new(self, i,j, opp):
+    def new(self, i,j, op):
         State.nncalls+=1
         nc = self.nums.copy()
-        nhist = self.hist+[(nc[i], nc[j], opp)]
-        nc[i] = opps[opp](nc[i], nc[j])
+        nhist = self.hist+[(nc[i], nc[j], op)]
+        nc[i] = ops[op](nc[i], nc[j])
         nc[j] = 0
         return State(nc, nhist)
 
