@@ -1,0 +1,2 @@
+-I/opt/rocm-5.2.3/include
+-std=gnu++2b
