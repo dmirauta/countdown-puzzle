@@ -1,8 +1,6 @@
 // Header only lib from https://github.com/dmirauta/easy-opencl-cpp
 
-#ifndef EASY_CL_
-
-#define EASY_CL_
+#pragma once
 
 #include <cassert>
 #include <fstream>
@@ -77,11 +75,15 @@ template <typename T>
 class SynchronisedArray : public AbstractSynchronisedArray {
 public:
   int buffsize;
+  bool no_copy_back; // dont copy back even if not read only
 
   T *cpu_buff;
 
+  SynchronisedArray(){};
+
   SynchronisedArray(cl::Context &context, cl_mem_flags flags, Dims dimensions) {
     mem_flags = flags;
+    no_copy_back = false;
 
     dims = dimensions;
     items = dims.x * dims.y * dims.z;
@@ -97,14 +99,15 @@ public:
   ~SynchronisedArray() { delete[] cpu_buff; }
 
   void to_gpu(cl::CommandQueue &queue) {
-    if (mem_flags !=
-        CL_MEM_WRITE_ONLY) // gpu will not need to read it, no need to copy to
+    if (mem_flags != CL_MEM_WRITE_ONLY) // otherwise gpu will not need to read
+                                        // it, no need to copy to
       queue.enqueueWriteBuffer(gpu_buff, CL_TRUE, 0, buffsize, cpu_buff);
   }
 
   void from_gpu(cl::CommandQueue &queue) {
-    if (mem_flags !=
-        CL_MEM_READ_ONLY) // gpu will not write to it, no need to bring it back
+    if (mem_flags != CL_MEM_READ_ONLY &&
+        !no_copy_back) // if either mem_flags==CL_MEM_READ_ONLY or no_copy_back,
+                       // we skip
       queue.enqueueReadBuffer(gpu_buff, CL_TRUE, 0, buffsize, cpu_buff);
   }
 
@@ -130,101 +133,6 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////
 //// Helper functions
-
-std::string read_string_from_file(const std::string &file_path)
-// https://stackoverflow.com/a/62772405
-{
-  const std::ifstream input_stream(file_path, std::ios_base::binary);
-
-  if (input_stream.fail()) {
-    throw std::runtime_error("Failed to open file");
-  }
-
-  std::stringstream buffer;
-  buffer << input_stream.rdbuf();
-
-  return buffer.str();
-}
-
-void setup_ocl(cl::Context &context, cl::Device &device,
-               cl::CommandQueue &queue, bool verbose)
-// based on
-// https://github.com/Dakkers/OpenCL-examples/blob/master/example01/main.cpp
-{
-  // get all platforms (drivers), e.g. NVIDIA
-  std::vector<cl::Platform> all_platforms;
-  cl::Platform::get(&all_platforms);
-
-  if (all_platforms.size() == 0) {
-    std::cout << " No platforms found. Check OpenCL installation!\n";
-    exit(1);
-  }
-  cl::Platform default_platform = all_platforms[0];
-
-  std::vector<cl::Device> all_devices;
-  default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
-  if (all_devices.size() == 0) {
-    std::cout << " No devices found. Check OpenCL installation!\n";
-    exit(1);
-  }
-
-  device = all_devices[0];
-  context = cl::Context({device});
-  queue = cl::CommandQueue(context, device);
-
-  if (verbose) {
-    std::cout << "Using platform: "
-              << default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-    std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << "\n";
-  }
-}
-
-std::map<std::string, cl::Kernel>
-setup_ocl_prog(cl::Context &context, cl::Device &device,
-               std::vector<std::string> source_files,
-               std::vector<std::string> kernel_names, std::string build_options,
-               bool verbose)
-// based on
-// https://github.com/Dakkers/OpenCL-examples/blob/master/example01/main.cpp
-{
-  cl::Program::Sources sources;
-
-  //     // Not sure how multiple sources are actually supposed to be provided,
-  //     we will just concatenate std::string kernel_code; for(auto source_file
-  //     : source_files)
-  //     {
-  //         kernel_code = read_string_from_file(source_file);
-  //         sources.push_back({kernel_code.c_str(), kernel_code.length()});
-  //     }
-
-  std::string kernel_code = "";
-  for (auto source_file : source_files) {
-    kernel_code += read_string_from_file(source_file);
-  }
-  sources.push_back({kernel_code.c_str(), kernel_code.length()});
-
-  if (verbose) {
-    std::cout << "Build options:\n"
-              << build_options << "\n"
-              << "Source:\n"
-              << kernel_code;
-  }
-
-  cl::Program program(context, sources);
-  if (program.build({device}, build_options.c_str()) != CL_SUCCESS) {
-    std::cout << "Error building: "
-              << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
-              << std::endl;
-    exit(1);
-  }
-
-  std::map<std::string, cl::Kernel> kernels;
-  for (auto kernel_name : kernel_names) {
-    kernels[kernel_name] = cl::Kernel(program, kernel_name.c_str());
-  }
-
-  return kernels;
-}
 
 inline void to_gpu(cl::CommandQueue &queue, cl::Kernel &kernel,
                    int firstargnum) {}
@@ -261,17 +169,80 @@ public:
 
   EasyCL(bool verbose = false) {
     _verbose = verbose;
-    setup_ocl(context, device, queue, verbose);
+
+    // based on
+    // https://github.com/Dakkers/OpenCL-examples/blob/master/example01/main.cpp
+
+    // get all platforms (drivers), e.g. NVIDIA
+    std::vector<cl::Platform> all_platforms;
+    cl::Platform::get(&all_platforms);
+
+    if (all_platforms.size() == 0) {
+      std::cout << " No platforms found. Check OpenCL installation!\n";
+      exit(1);
+    }
+    cl::Platform default_platform = all_platforms[0];
+
+    std::vector<cl::Device> all_devices;
+    default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
+    if (all_devices.size() == 0) {
+      std::cout << " No devices found. Check OpenCL installation!\n";
+      exit(1);
+    }
+
+    device = all_devices[0];
+    context = cl::Context({device});
+    queue = cl::CommandQueue(context, device);
+
+    if (_verbose) {
+      std::cout << "Using platform: "
+                << default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
+      std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << "\n";
+    }
   }
 
   void load_kernels(std::vector<std::string> source_files,
                     std::vector<std::string> kernel_names,
-                    std::string build_options) {
-    std::map<std::string, cl::Kernel> new_kernels = setup_ocl_prog(
-        context, device, source_files, kernel_names, build_options, _verbose);
+                    std::string build_options = "")
+  // based on
+  // https://github.com/Dakkers/OpenCL-examples/blob/master/example01/main.cpp
+  {
+    cl::Program::Sources
+        sources; // cannot actually push_back multiple sources to this?
 
-    for (auto pair : new_kernels) {
-      kernels[pair.first] = pair.second;
+    std::string kernel_code = "";
+    for (auto source_file : source_files) {
+      // https://stackoverflow.com/a/62772405
+      const std::ifstream input_stream(source_file, std::ios_base::binary);
+
+      if (input_stream.fail()) {
+        throw std::runtime_error("Failed to open file");
+      }
+
+      std::stringstream buffer;
+      buffer << input_stream.rdbuf();
+
+      kernel_code += buffer.str();
+    }
+    sources.push_back({kernel_code.c_str(), kernel_code.length()});
+
+    if (_verbose) {
+      std::cout << "Build options:\n"
+                << build_options << "\n"
+                << "Source:\n"
+                << kernel_code;
+    }
+
+    cl::Program program(context, sources);
+    if (program.build({device}, build_options.c_str()) != CL_SUCCESS) {
+      std::cout << "Error building: "
+                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)
+                << std::endl;
+      exit(1);
+    }
+
+    for (auto kernel_name : kernel_names) {
+      kernels[kernel_name] = cl::Kernel(program, kernel_name.c_str());
     }
   }
 
@@ -304,5 +275,3 @@ public:
     queue.finish(); // blocking
   }
 };
-
-#endif
